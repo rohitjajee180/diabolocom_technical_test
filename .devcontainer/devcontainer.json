@@ -16,5 +16,5 @@
             ]
         }
     },
-    "postCreateCommand": "pip install uv && uv sync --dev && uv pip install --group core && uv pip install --group dev"
+    "postCreateCommand": "pip install uv && sudo /home/vscode/.local/bin/uv pip install --system --group dev && sudo /home/vscode/.local/bin/uv pip install --system --group core"
 }
