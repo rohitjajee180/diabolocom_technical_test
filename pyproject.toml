@@ -10,7 +10,8 @@ core = [
     "baml-py>=0.78.0",
     "openai>=1.65.5",
     "fastapi>=0.115.11",
-    "python-dotenv==1.0.1"
+    "python-dotenv==1.0.1",
+    "pydantic==2.10.2"
 ]
 dev = [
     "black==23.10.1",
