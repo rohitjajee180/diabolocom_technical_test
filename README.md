@@ -1,171 +1,178 @@
-# **Technical Test Diabolocom AI - Data Scientist / LLM Ops Engineer**
+# Technical Test Implementation Report
 
-## Introduction
+## Setup and Running Instructions
 
-Welcome to our technical test! This exercise is designed to assess your problem-solving approach, how you structure your work, and your intuition about LLMs. We are not necessarily looking for a fully polished solution. Instead, we want to understand your methodology and how you adapt when tackling an end-to-end use case.
+### Prerequisites
+- Docker Desktop installed and running
+- Visual Studio Code with Dev Containers extension installed
 
-## Instructions
-The goal is to build an API with two routes that address the following use cases:
-1. <b>Text Classification</b> – Classify a given text into a list of provided themes.
-2. <b>Form Completion</b> – Extract structured information from a text to populate a predefined form.
+### Running the Application
+1. Clone the repository
+2. Open the project in VS Code
+3. When prompted "Reopen in Container", click "Yes" 
+   - Alternatively, press F1, type "Reopen in Container" and select the option
+4. The dev container will automatically:
+   - Set up Python 3.11
+   - Install UV package manager
+   - Install project dependencies
+5. Copy `.env.example` to `.env` and add your Nebius API key
+6. Run the FastAPI application:
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+7. Access the API documentation at `http://localhost:8000/docs`
 
-### Technical Stack Constraints
-You'll have several constraints in terms of stack to use:
-* <b>Infra/Deployment</b>: We use [UV](https://docs.astral.sh/uv/) for managing projects. Please use it as well.
-* <b>Text Generation</b>: We rely on [BAML](https://docs.boundaryml.com/) for constrained generation due to its efficiency in structured outputs. You will need to integrate it into your implementation. One of our evaluation goal is to see how you adapt to new tools.
-* <b>API Framework</b>: You are free to choose any framework, but we recommend [FastAPI](https://fastapi.tiangolo.com/) due to its performance and ease of use.
+---
 
+# Solutions to 2 use cases and 3 bonus tasks
 
-## Use case 1. Text classification
-### Input format
-The API should accept input in the following format:
+## Use Case 1: Text Classification
+
+**Endpoint:** `/classify_text`
+
+**Method:** `POST`
+
+This endpoint allows you to classify input text into predefined themes. It's ideal for categorizing customer queries, support tickets, or any text that needs thematic classification.
+
+### Request Body:
 ```json
 {
-    "text": "I am calling because I have a problem with my internet connection",
-    "themes": [
+    "text": "Your input text here",
+    "available_themes": [
         {
-            "title": "Technical support",
-            "description": "The customer is calling for technical support"
-        },
-        {
-            "title": "Billing",
-            "description": "The customer is calling for billing issues"
-        },
-        {
-            "title": "Refund",
-            "description": "The customer is calling for a refund"
+            "title": "Theme Title",
+            "description": "Theme Description"
         }
     ]
 }
 ```
 
-### Output format
-The API should return a response like this:
+### Response:
 ```json
 {
-    "model_reasoning": "This text is about technical support, therefore the chosen theme is 'Technical support'.",
+    "model_reasoning": "Explanation of why this classification was chosen",
     "chosen_theme": {
-        "title": "Technical support",
-        "description": "The customer is calling for technical support"
-    }
-}
-```
-
-## Use case 2. Form completion
-### JSON Schema to Fill
-The API should extract structured data from a given text and populate the following JSON schema:
-```json
-{
-  "title":"Customer Information Form",
-  "type":"object",
-  "properties":{
-    "personal_info":{
-      "type":"object",
-      "properties":{
-        "first_name":{
-          "type":"string",
-          "description":"The customer's first name"
-        },
-        "last_name":{
-          "type":"string",
-          "description":"The customer's last name"
-        },
-        "gender":{
-          "type":"string",
-          "enum":[
-            "Male",
-            "Female",
-            "Other"
-          ],
-          "description":"The customer's gender"
-        }
-      },
-      "required":[
-        "first_name",
-        "last_name",
-        "gender"
-      ]
+        "title": "Selected Theme",
+        "description": "Theme Description"
     },
-    "contact_info":{
-      "type":"object",
-      "properties":{
-        "email":{
-          "type":"string",
-          "format":"email",
-          "description":"The customer's email address"
-        },
-        "phone":{
-          "type":"string",
-          "description":"The customer's phone number"
-        },
-        "preferred_contact_method":{
-          "type":"string",
-          "enum":[
-            "Email",
-            "Phone"
-          ],
-          "description":"The customer's preferred method of contact"
-        },
-        "call_reasons":{
-          "type":"array",
-          "items":{
-            "type":"string"
-          },
-          "description":"The reasons for the call",
-          "minItems":1
-        }
-      }
+    "statistics": {
+        "frequency": 1,
+        "total_tries": 1,
+        "confidence": 1.0
     }
-  },
-  "required":[
-    "personal_info",
-    "contact_info"
-  ]
 }
 ```
 
-### Input format
-The API should accept input in the following format:
+---
+
+## Use Case 2: Form Completion
+
+**Endpoint:** `/form_filling`
+
+**Method:** `POST`
+
+This endpoint extracts structured customer information from conversation text. It's perfect for automatically filling out forms based on customer interactions.
+
+### Request Body:
 ```json
 {
-    "text": "Agent: Good morning! Thank you for reaching out. I’ll need to collect some basic details to assist you better. Could you please provide your first and last name? Customer: Sure! My name is John Doe. Agent: Thank you, John. May I also ask for your gender? Customer: I'd prefer not to share that at the moment. Agent: No problem at all. Now, for contact purposes, could you share your email address? Customer: Yes, my email is johndoe@example.com. Agent: Great! Do you have a phone number where we can reach you? Customer: I’d rather not provide that right now. Agent: That’s completely fine. How would you prefer us to contact you—by email or phone? Customer: Please contact me via Email. Agent: Understood! Lastly, can you share the reason for your call today? Customer: I’m not ready to specify that just yet. Agent: That’s okay, John! I’ve noted everything down. If you need any further assistance, feel free to reach out. Have a great day!"
+    "text": "Your conversation text here"
 }
 ```
 
-### Output format
-The API should return a response like this:
+### Response:
+Returns structured customer information including:
+- Personal information (name, gender)
+- Contact details (email, phone, preferred contact method)
+- Additional context (reasons for contact)
+
+---
+
+## Bonus 1: Parallel Classifications with Confidence Scoring
+
+**Endpoint:** `/classify_text`
+
+**Method:** `POST`
+
+**Additional Parameter:** `num_tries` (1-10)
+
+This enhanced version of the classification endpoint performs multiple classification attempts to build consensus and provide confidence scores.
+
+### Request:
 ```json
 {
-  "personal_info": {
-    "first_name": "John",
-    "last_name": "Doe",
-    "gender": null
-  },
-  "contact_info": {
-    "email": "johndoe@example.com",
-    "phone": null,
-    "preferred_contact_method": "Email",
-    "call_reasons": null
-  }
+    "text": "Your input text here",
+    "available_themes": [...],
+    "num_tries": 5
 }
 ```
 
-## Bonuses
+### Response:
+```json
+{
+    "model_reasoning": "Consensus-based reasoning",
+    "chosen_theme": {
+        "title": "Most Frequent Theme",
+        "description": "Theme Description"
+    },
+    "statistics": {
+        "frequency": 4,
+        "total_tries": 5,
+        "confidence": 0.8
+    }
+}
+```
 
-Below are three bonuses; you can choose one to complete if you have time (or more if you're feeling ambitious). These are not mandatory, but they will help us understand your skills better.
+---
 
-### Bonus 1: Probabilistic Text Classification
+## Bonus 2: Dynamic Schema Form Completion
 
-Since LLMs are stochastic, you can enhance the classification by running multiple parallel classifications and providing an estimate of the model’s confidence in its choice.
+**Endpoint:** `/generic_form_completion`
 
-### Bonus 2: Generalized Form Completion
+**Method:** `POST`
 
-Modify the form completion functionality to dynamically handle <b>any</b> given JSON schema instead of only the predefined one.
+This flexible endpoint allows you to define custom schemas for information extraction, making it adaptable to any form structure.
 
-### Bonus 3: Streamed form completion
+### Request Body:
+```json
+{
+    "conversation": {
+        "text": "Your conversation text"
+    },
+    "json_schema": {
+        "type": "object",
+        "properties": {
+            "your_custom_field": {"type": "string"}
+        }
+    }
+}
+```
 
-For real time applications, we might want to stream the llm completion. Implement a streamed version of the form completion functionality.
+**Additional Parameter:** `max_retries` (1-5, default: 3)
 
-## Additional Notes
-* <b>LLM Inference</b>: You can use [Nebius's inference API](https://docs.nebius.com/studio/inference), which offers free usage up to 600 RPM or 400,000 TPM. This is a quick and efficient way to get started.
-* <b>BAML Editor Support</b>: We recommend using VSCode or Cursor with the official [BAML extension](https://docs.boundaryml.com/guide/installation-editors/vs-code-extension) for improved structured generation development.
+### Response:
+Returns the structured information according to the provided JSON schema.
+
+---
+
+## Bonus 3: Streamed Form Completion
+
+**Endpoint:** `/form_filling/stream`
+
+**Method:** `POST`
+
+This endpoint provides real-time streaming of form completion results using Server-Sent Events (SSE), ideal for responsive user interfaces.
+
+### Request Body:
+```json
+{
+    "text": "Your conversation text here"
+}
+```
+
+### Response:
+Streams data in SSE format:
+```
+data: {"personal_info": {"first_name": "John"}}
+
+data: {"contact_info": {"email": "john@example.com"}}
