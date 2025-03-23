@@ -1,3 +1,29 @@
+# Technical Test Implementation Report
+
+## Setup and Running Instructions
+
+### Prerequisites
+- Docker Desktop installed and running
+- Visual Studio Code with Dev Containers extension installed
+
+### Running the Application
+1. Clone the repository
+2. Open the project in VS Code
+3. When prompted "Reopen in Container", click "Yes" 
+   - Alternatively, press F1, type "Reopen in Container" and select the option
+4. The dev container will automatically:
+   - Set up Python 3.11
+   - Install UV package manager
+   - Install project dependencies
+5. Copy `.env.example` to `.env` and add your Nebius API key
+6. Run the FastAPI application:
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+7. Access the API documentation at `http://localhost:8000/docs`
+
+---
+
 # Solutions to 2 use cases and 3 bonus tasks
 
 ## Use Case 1: Text Classification
